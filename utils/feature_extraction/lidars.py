@@ -6,7 +6,7 @@ from depth_map import dense_map
 import matplotlib.pyplot as plt
 from calibration import Calibration
 
-if __name__ == "__main__":
+def lidar_to_layer(imgs_path, velodyne_path, cam_path):
     root = "./"
     image_dir = os.path.join(root, "images")
     velodyne_dir = os.path.join(root, "velodyne")
@@ -17,7 +17,6 @@ if __name__ == "__main__":
     lidar = np.fromfile(os.path.join(velodyne_dir, "%010d.bin" % cur_id), dtype=np.float32).reshape(-1, 4)
     calib = Calibration(os.path.join(calib_dir, "%06d.txt" % cur_id))
     # From LiDAR coordinate system to Camera Coordinate system
-
     lidar_rect = calib.lidar2cam(lidar[:,0:3])
     # From Camera Coordinate system to Image frame
     lidarOnImage, mask = calib.rect2Img(lidar_rect, img.shape[1], img.shape[0])
@@ -25,6 +24,7 @@ if __name__ == "__main__":
     # Concatenate LiDAR position with the intesity (3), with (2) we would have the depth
     lidarOnImage = np.concatenate((lidarOnImage, lidar_rect[mask,2].reshape(-1,1)), 1)
     out = dense_map(lidarOnImage.T, img.shape[1], img.shape[0], 6)
+    print(img.shape)
     plt.figure(figsize=(20,40))
     plt.imsave("depth_map_%06d.png" % cur_id, out)
     plt.close()

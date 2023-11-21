@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class Calibration:
     def __init__(self, calib_filepath):
         calibs = self.read_calib_file(calib_filepath)
