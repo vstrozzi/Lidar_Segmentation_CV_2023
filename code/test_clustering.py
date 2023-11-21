@@ -23,17 +23,17 @@ if __name__ == "__main__":
     lidarOnImage, mask = calib.rect2Img(lidar_rect, img.shape[1], img.shape[0])
     lidarOnImage = np.concatenate((lidarOnImage, lidar_rect[mask,2].reshape(-1,1)), 1)
     out = dense_map(lidarOnImage.T, img.shape[1], img.shape[0], 6)
-    rows, cols, chs = out.shape
+    rows, cols = img.shape[0], img.shape[1]
     indices = np.dstack(np.indices(out.shape[:2]))
     xycolors = np.concatenate((img, indices), axis=-1) 
-    xycolors = np.reshape(xycolors, [-1,5])
+    xycolors = np.reshape(xycolors, [-1,4])
     print(xycolors.shape)
     db = DBSCAN(eps=5, min_samples=50, metric = 'euclidean',algorithm ='auto')
     db.fit(xycolors)
     labels = db.labels_
     plt.figure(2)
     plt.subplot(2, 1, 1)
-    plt.imshow(img)
+    plt.imshow(out)
     plt.axis('off')
     plt.subplot(2, 1, 2)
     plt.imshow(np.reshape(labels, [rows, cols]))
