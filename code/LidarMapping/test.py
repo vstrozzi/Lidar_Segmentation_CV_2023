@@ -28,7 +28,7 @@ if __name__ == "__main__":
     plt.imsave("depth_map_%06d.png" % cur_id, out)
     plt.close()
     
-    exit()
+    
 
     fig = plt.figure(figsize=(20,40))
     

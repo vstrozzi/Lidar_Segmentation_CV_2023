@@ -24,9 +24,12 @@ if __name__ == "__main__":
     lidarOnImage = np.concatenate((lidarOnImage, lidar_rect[mask,2].reshape(-1,1)), 1)
     out = dense_map(lidarOnImage.T, img.shape[1], img.shape[0], 6)
     rows, cols = img.shape[0], img.shape[1]
+
+    
     indices = np.dstack(np.indices(out.shape[:2]))
-    xycolors = np.concatenate((img, indices), axis=-1) 
-    xycolors = np.reshape(xycolors, [-1,4])
+    print(indices.shape, out.shape)
+    xycolors = np.concatenate((out[..., np.newaxis], indices), axis=-1) 
+    xycolors = np.reshape(xycolors, [-1,3])
     print(xycolors.shape)
     db = DBSCAN(eps=5, min_samples=50, metric = 'euclidean',algorithm ='auto')
     db.fit(xycolors)
