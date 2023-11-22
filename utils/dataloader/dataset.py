@@ -89,9 +89,9 @@ class DatasetKITTI2015(Dataset):
 
         # Perform transforms
         data = dict()
-        data['left_rgb']= list(map(self.transform.rgb, [left_rgb]))
-        data['left_sdisp'] = list(map(self.transform.depth, [left_sdisp]))
-        data['left_disp'] = list(map(self.transform.depth, [left_disp]))
+        data['left_rgb']= self.transform.rgb(left_rgb)
+        data['left_sdisp'] = self.transform.depth(left_sdisp)
+        data['left_disp'] = self.transform.depth(left_disp)
         data['width'] = img_w
 
         return data
@@ -206,6 +206,7 @@ def test_basic():
     for i, data in enumerate(dataset):
         # Unpack data
         data = EasyDict(data)
+
         left_rgb_np = data.left_rgb.numpy().transpose(1, 2, 0)
         left_sd_np = data.left_sdisp.numpy()[0]
         left_d_np = data.left_disp.numpy()[0]
