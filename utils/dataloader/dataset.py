@@ -11,10 +11,11 @@ from skimage import io
 from PIL import Image
 from torchvision import transforms  
 from torch.utils.data.dataset import Dataset
-
+import torch
+from collections import defaultdict
 
 class DatasetKITTI2015(Dataset):
-    FIXED_SHAPE = (352, 1216)
+    FIXED_SHAPE = (320, 1216)
 
     def __init__(self, root_dir, mode, output_size, random_sampling=None, fix_random_seed=False):
         # Check arguments
@@ -22,6 +23,8 @@ class DatasetKITTI2015(Dataset):
         self.root_dir = root_dir
         self.mode = mode
         self.output_size = output_size
+
+
         if random_sampling is None:
             self.sampler = None
         elif isinstance(random_sampling, float):
@@ -47,6 +50,10 @@ class DatasetKITTI2015(Dataset):
                 transforms.ToPILImage(mode='F'), # NOTE: is this correct?!
                 transforms.ToTensor()
             ])
+            self.transform.segm = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.ToTensor()
+            ])
         else: # val
             self.transform.rgb = transforms.Compose([
                 transforms.ToPILImage(),
@@ -56,22 +63,23 @@ class DatasetKITTI2015(Dataset):
                 transforms.ToPILImage(mode='F'), # NOTE: is this correct?!
                 transforms.ToTensor()
             ])
+            self.transform.segm = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.ToTensor()
+            ])
 
     def __getitem__(self, idx):
         # Get data
-        while(True):
-            try: # NOTE: there are broken images in the dataset; skip those broken images
-                left_rgb = read_rgb(self.left_data_path['rgb'][idx])
-                img_h, img_w = left_rgb.shape[:2]
-            except: # Encounter broken RGB
-                idx = random.randint(0, len(self.left_data_path['rgb']))
-                continue
-            left_disp = read_depth(self.left_data_path['disp'][idx])
-            if self.sampler is None:
-                left_sdisp = depth2disp(read_depth(self.left_data_path['sdepth'][idx]))
-            else:
-                left_sdisp = self.sampler.sample(left_disp)
-            break
+        
+        left_rgb = read_rgb(self.left_data_path['rgb'][idx])
+
+        img_h, img_w = left_rgb.shape[:2]
+        left_disp = read_depth(self.left_data_path['disp'][idx])
+        left_segm = read_rgb(self.left_data_path['segm'][idx])
+        if self.sampler is None:
+            left_sdisp = depth2disp(read_depth(self.left_data_path['sdepth'][idx]))
+        else:
+            left_sdisp = self.sampler.sample(left_disp)
 
         # Crop to fixed size
         def crop_fn(x):
@@ -79,22 +87,17 @@ class DatasetKITTI2015(Dataset):
             start_w = 0
             end_w = min(img_w, start_w+self.FIXED_SHAPE[1])
             return x[start_h:start_h+self.FIXED_SHAPE[0], start_w:end_w]
-        left_rgb, left_sdisp, left_disp = list(map(crop_fn, [left_rgb, left_sdisp, left_disp]))
-        if self.output_size[0] < self.FIXED_SHAPE[0] or self.output_size[1] < self.FIXED_SHAPE[1]:
-            x1 = random.randint(0, self.FIXED_SHAPE[1]-self.output_size[1])
-            y1 = random.randint(0, self.FIXED_SHAPE[0]-self.output_size[0])
-            def rand_crop(x):
-                return x[y1:y1+self.output_size[0], x1:x1+self.output_size[1]]
-            left_rgb, left_sdisp, left_disp = list(map(rand_crop, [left_rgb, left_sdisp, left_disp]))
-
+        left_rgb, left_sdisp, left_disp, left_segm = list(map(crop_fn, [left_rgb, left_sdisp, left_disp, left_segm]))
+        
         # Perform transforms
         data = dict()
         data['left_rgb']= self.transform.rgb(left_rgb)
         data['left_sdisp'] = self.transform.depth(left_sdisp)
         data['left_disp'] = self.transform.depth(left_disp)
+
         data['width'] = img_w
 
-        return data
+        return data, self.transform.segm(left_segm)
 
     def __len__(self):
         return len(self.left_data_path['rgb'])
@@ -115,7 +118,7 @@ class UniformSamplerByPercentage(object):
             s_x[mask_keep] = x[mask_keep]
         else:
             sparse_mask = (x <= self.max_depth) & (x > 0)
-            n_keep = sparse_mask.astype(np.float).sum()
+            n_keep = sparse_mask.astype(float).sum()
             if n_keep == 0:
                 raise ValueError('`max_depth` filter out all valid depth points')
             else:
@@ -170,7 +173,7 @@ def read_depth(path):
 
 def get_kitti2015_datapath(root_dir, mode, sampler=None):
     """ Read path to all data from KITTI Stereo 2015 dataset """
-    left_data_path = {'rgb': [], 'sdepth': [], 'disp': [], 'disp_occ': []}
+    left_data_path = {'rgb': [], 'sdepth': [], 'disp': [], 'disp_occ': [], 'segm': []}
     if sampler is None:
         fname_list = sorted(os.listdir(os.path.join(root_dir, mode, 'velodyne_2')))
         fname_list = [f[:-4]+'_10.png' for f in fname_list]
@@ -181,54 +184,7 @@ def get_kitti2015_datapath(root_dir, mode, sampler=None):
         left_data_path['rgb'].append(os.path.join(root_dir, mode, 'image_2', fname))
         left_data_path['disp'].append(os.path.join(root_dir, mode, 'disp_noc_0', fname))
         left_data_path['disp_occ'].append(os.path.join(root_dir, mode, 'disp_occ_0', fname))
+        left_data_path['segm'].append(os.path.join(root_dir, mode, 'labels_2', fname))
         if sampler is None:
             left_data_path['sdepth'].append(os.path.join(root_dir, mode, 'velodyne_2', fname[:-7]+'.png'))
     return left_data_path
-
-
-def test_basic():
-    """ Examine the correctness of the dataset class """
-    import matplotlib.pyplot as plt
-    from tqdm import tqdm
-    import pdb
-    
-    # Setup dataset
-    dataset = DatasetKITTI2015(root_dir='../../dataset',
-                               mode='training',
-                               output_size=(352, 1224),
-                               random_sampling=0.15)
-
-    # Check data
-    visualize_rgb = True
-    visualize_sd = True
-    visualize_d = True
-    print('Dataset size = {}'.format(len(dataset)))
-    for i, data in enumerate(dataset):
-        # Unpack data
-        data = EasyDict(data)
-
-        left_rgb_np = data.left_rgb.numpy().transpose(1, 2, 0)
-        left_sd_np = data.left_sdisp.numpy()[0]
-        left_d_np = data.left_disp.numpy()[0]
-        #print(i, left_rgb_np.shape)
-        #import pdb; pdb.set_trace()
-
-        # Visualization
-        if visualize_rgb:
-            fig, axes = plt.subplots(2, 1)
-            axes[0].set_title('RGB (left)')
-            axes[0].imshow(left_rgb_np)
-        if visualize_sd:
-            fig, axes = plt.subplots(2, 1)
-            axes[0].set_title('LiDAR (left)')
-            axes[0].imshow(left_sd_np)
-        if visualize_d:
-            fig, axes = plt.subplots(2, 1)
-            axes[0].set_title('Depth (left)')
-            axes[0].imshow(left_d_np)
-        plt.show(block=False)
-        pdb.set_trace()
-
-
-if __name__ == '__main__':
-    test_basic()

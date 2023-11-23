@@ -4,7 +4,7 @@ from .blocks.blocks import ConvBlock, AttentionBlock, EncoderBlock, DecoderBlock
 from .basemodel import BaseModel
 
 class UNet(BaseModel):
-    def __init__(self, loss, eval_metric, channels, output_layers=1, f=64, img_shape=(256, 256), activate_clf=True, att=False, optimizer=torch.optim.Adam, lr=1e-4, postprocess=None):
+    def __init__(self, loss, eval_metric, channels, output_layers=1, output_channels = 1, f=64, img_shape=(256, 256), activate_clf=True, att=False, optimizer=torch.optim.Adam, lr=1e-4, postprocess=None):
         super().__init__(loss, eval_metric, optimizer, lr)
 
         self.e1 = EncoderBlock(channels, f)
@@ -19,7 +19,8 @@ class UNet(BaseModel):
         self.d3 = DecoderBlock(4*f, 2*f, AttentionBlock(2*f) if att else None)
         self.d4 = DecoderBlock(2*f, f, AttentionBlock(1*f) if att else None)
 
-        self.output = nn.Conv2d(f, 1, kernel_size=1, padding=0)
+        self.output = nn.Conv2d(f, output_channels, kernel_size=1, padding=0)
+
         #self.output2 = nn.Conv2d(32, 1, kernel_size=1, padding=0)
 
         self.clf = nn.Linear(img_shape[0]*img_shape[1], output_layers)
