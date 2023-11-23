@@ -49,14 +49,3 @@ class UNet(BaseModel):
             out = self.clf(out)        
 
         return torch.sigmoid(out)
-    
-    def validation_step(self, val_batch, batch_idx):
-        x, y = val_batch
-        out = self.forward(x)
-        loss = self.loss(out.squeeze(), y.squeeze())
-        out = out.squeeze().cpu().round()
-        if self.postprocess != None:
-            out = self.postprocess(out)
-        score = self.eval_metric(out, y.squeeze().cpu())
-        self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("val_score", score, on_step=False, on_epoch=True, prog_bar=True)
