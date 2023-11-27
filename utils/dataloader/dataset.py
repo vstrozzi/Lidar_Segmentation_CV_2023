@@ -17,8 +17,8 @@ from collections import defaultdict
 from torchvision.transforms import InterpolationMode
 
 class DatasetKITTI2015(Dataset):
-    FIXED_SHAPE = (320, 1216)
-    #REDUCED_SHAPE = (160, 808)
+    FIXED_SHAPE = (320, 1216)   # CROP
+    REDUCED_SHAPE = (160, 808)
 
     def __init__(self, root_dir, mode, output_size, random_sampling=None, fix_random_seed=False):
         # Check arguments
@@ -48,18 +48,16 @@ class DatasetKITTI2015(Dataset):
             self.transform.rgb = transforms.Compose([
                 transforms.ToPILImage(),
                 transforms.ToTensor(),
-                transforms.Normalize(mean = [0.485, 0.456, 0.406],
-                         std= [0.229, 0.224, 0.225]),
-                #transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.BILINEAR, antialias=None)
+                transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.BILINEAR, antialias=None)
             ])
             self.transform.depth = transforms.Compose([
                 transforms.ToPILImage(mode='F'), # NOTE: is this correct?!
                 transforms.ToTensor(),
-                #transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.BILINEAR, antialias=None)
+                transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.BILINEAR, antialias=None)
             ])
             self.transform.segm = transforms.Compose([
                 transforms.ToTensor(),
-                #transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.NEAREST_EXACT, antialias=None)
+                transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.NEAREST_EXACT, antialias=None)
             ])
         else: # val
             self.transform.rgb = transforms.Compose([
@@ -67,16 +65,16 @@ class DatasetKITTI2015(Dataset):
                 transforms.ToTensor(),
                 transforms.Normalize(mean = [0.485, 0.456, 0.406],
                          std= [0.229, 0.224, 0.225]),
-                #transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.BILINEAR, antialias=None)
+                transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.BILINEAR, antialias=None)
             ])
             self.transform.depth = transforms.Compose([
                 transforms.ToPILImage(mode='F'), # NOTE: is this correct?!
                 transforms.ToTensor(),
-                #transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.BILINEAR, antialias=None)
+                transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.BILINEAR, antialias=None)
             ])
             self.transform.segm = transforms.Compose([
                 transforms.ToTensor(),
-                #transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.NEAREST_EXACT, antialias=None)
+                transforms.Resize(self.REDUCED_SHAPE, interpolation=InterpolationMode.NEAREST_EXACT, antialias=None)
             ])
 
     def __getitem__(self, idx):
@@ -87,7 +85,7 @@ class DatasetKITTI2015(Dataset):
         img_h, img_w = left_rgb.shape[:2]
         left_disp = read_depth(self.left_data_path['disp'][idx])
         left_segm = read_segm(self.left_data_path['segm'][idx])
-        
+
         if self.sampler is None:
             left_sdisp = depth2disp(read_depth(self.left_data_path['sdepth'][idx]))
         else:
