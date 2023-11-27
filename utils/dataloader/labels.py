@@ -3,7 +3,7 @@ import numpy as np
 
 def RGBtoOneHot(img, colorDict):
     """ Expect the input as tensor image (CxWxH) """
-    img = (np.transpose(img, (1, 2, 0))*256).int().numpy()
+    img = (np.transpose(img.cpu(), (1, 2, 0))*256).int().numpy()
   
     W = np.power(256, [[0],[1],[2]])
     
@@ -19,6 +19,29 @@ def RGBtoOneHot(img, colorDict):
             pass
     return mask
 
+""" def RGBtoOneHot(img, colorDict):
+     Expect the input as tensor image (CxWxH)
+    img = (torch.permute(img, (1, 2, 0))*256).long()
+  
+    W = torch.tensor([
+       [    1],
+       [  256],
+       [65536]])
+
+    img_id = torch.matmul(img, W)
+    values = torch.unique(img_id)
+    print(values)
+    mask = torch.zeros(img_id.shape)
+
+    for i, c in enumerate(values):
+        try:
+            print(colorDict[tuple(img[img_id==c][0])])
+            print("palle")
+            mask[img_id==c] = colorDict[tuple(img[img_id==c][0])] 
+        except:
+            pass
+    return mask
+ """
 
     
 

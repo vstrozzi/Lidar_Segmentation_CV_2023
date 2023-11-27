@@ -22,7 +22,7 @@ class LightningModel(pl.LightningModule):
         # Test model on one sample
 
         x, y = train_batch
-        y = torch.tensor(list(map(lambda k: RGBtoOneHot(k, dict).astype(int), y)))
+        y = torch.tensor(list(map(lambda k: RGBtoOneHot(k, dict).astype(int), y))).cuda()
 
         if self.mode == "LIDAR":
             out = x["left_disp"]
