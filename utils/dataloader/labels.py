@@ -3,47 +3,15 @@ import numpy as np
 import torch
 
 def RGBtoOneHot(img, colorDict):
-    """ Expect the input as tensor image (CxWxH) """
-    img = (np.transpose(img.cpu(), (1, 2, 0))*256).int().numpy()
+    """ Expect the input as np image (CxWxH) """
+    arr = np.zeros(img.shape[:2]) ## rgb shape: (h,w,3); arr shape: (h,w)
   
-    W = np.power(256, [[0],[1],[2]])
-    
-    img_id = img.dot(W).squeeze(-1) 
-    values = np.unique(img_id)
-
-    mask = np.zeros(img_id.shape)
-
-    for i, c in enumerate(values):
-        try:
-            mask[img_id==c] = colorDict[tuple(img[img_id==c][0])] 
-        except:
-            pass
-    return torch.from_numpy(mask)
-
-""" def RGBtoOneHot(img, colorDict):
-     Expect the input as tensor image (CxWxH)
-    img = (torch.permute(img, (1, 2, 0))*256).long()
+    for _, color in enumerate(colorDict.keys()):
+        map = colorDict[color] 
+        color = np.array(color)
+        arr[np.all(img == color, axis=-1)] = map
   
-    W = torch.tensor([
-       [    1],
-       [  256],
-       [65536]])
-
-    img_id = torch.matmul(img, W)
-    values = torch.unique(img_id)
-    print(values)
-    mask = torch.zeros(img_id.shape)
-
-    for i, c in enumerate(values):
-        try:
-            print(colorDict[tuple(img[img_id==c][0])])
-            print("palle")
-            mask[img_id==c] = colorDict[tuple(img[img_id==c][0])] 
-        except:
-            pass
-    return mask
- """
-
+    return arr
     
 
 # a label and all meta information
