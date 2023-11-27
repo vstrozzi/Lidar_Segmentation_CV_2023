@@ -18,7 +18,7 @@ from torchvision.transforms import InterpolationMode
 
 class DatasetKITTI2015(Dataset):
     FIXED_SHAPE = (320, 1216)   # CROP
-    REDUCED_SHAPE = (160, 808)
+    REDUCED_SHAPE = (160, 608)
 
     def __init__(self, root_dir, mode, output_size, random_sampling=None, fix_random_seed=False):
         # Check arguments
