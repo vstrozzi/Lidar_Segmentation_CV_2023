@@ -22,7 +22,6 @@ class LightningModel(pl.LightningModule):
         # Test model on one sample
 
         x, y = train_batch
-        y = torch.tensor(list(map(lambda k: RGBtoOneHot(k, dict).astype(int), y))).cuda()
 
         if self.mode == "LIDAR":
             out = x["left_disp"]
@@ -42,7 +41,6 @@ class LightningModel(pl.LightningModule):
     
     def validation_step(self, val_batch, batch_idx):
         x, y = val_batch
-        y = torch.tensor(list(map(lambda k: RGBtoOneHot(k, dict).astype(int), y)))
 
         if self.mode == "LIDAR":
             out = x["left_disp"]

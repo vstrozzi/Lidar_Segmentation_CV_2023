@@ -11,6 +11,7 @@ from skimage import io
 from PIL import Image
 from torchvision import transforms  
 from torch.utils.data.dataset import Dataset
+from utils.dataloader.labels import *
 import torch
 from collections import defaultdict
 
@@ -101,7 +102,7 @@ class DatasetKITTI2015(Dataset):
 
         data['width'] = img_w
 
-        return data, self.transform.segm(left_segm)
+        return data, RGBtoOneHot(self.transform.segm(left_segm), {x.color:((x.trainId)) for x in labels})
 
     def __len__(self):
         return len(self.left_data_path['rgb'])

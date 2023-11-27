@@ -1,5 +1,6 @@
 from collections import namedtuple
 import numpy as np
+import torch
 
 def RGBtoOneHot(img, colorDict):
     """ Expect the input as tensor image (CxWxH) """
@@ -17,7 +18,7 @@ def RGBtoOneHot(img, colorDict):
             mask[img_id==c] = colorDict[tuple(img[img_id==c][0])] 
         except:
             pass
-    return mask
+    return torch.from_numpy(mask)
 
 """ def RGBtoOneHot(img, colorDict):
      Expect the input as tensor image (CxWxH)
