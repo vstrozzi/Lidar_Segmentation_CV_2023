@@ -53,7 +53,7 @@ class LightningModel(pl.LightningModule):
         loss = self.loss(out, y)
         
         pred = torch.argmax(out, 1)
-        score = self.eval_metric(pred.squeeze().cpu().round(), y.squeeze().cpu())
+        score = self.eval_metric(pred.squeeze(), y.squeeze())
         self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log("val_score", score, on_step=False, on_epoch=True, prog_bar=True)
     
