@@ -23,7 +23,15 @@ class LightningModel(pl.LightningModule):
 
         x, y = train_batch
         y = torch.tensor(list(map(lambda k: RGBtoOneHot(k, dict).astype(int), y)))
-        out = self.forward(x["left_rgb"])
+
+        if self.mode == "LIDAR":
+            out = x["left_disp"]
+        elif self.mode == "LIDAR-RGB":
+            out = torch.cat((x["left_rgb"], x["left_disp"]), 1)
+        else:
+            out = x["left_rgb"]
+
+        out = self.forward(out)
         loss = self.loss(out, y)   
 
         pred = torch.argmax(out, 1)
@@ -35,7 +43,15 @@ class LightningModel(pl.LightningModule):
     def validation_step(self, val_batch, batch_idx):
         x, y = val_batch
         y = torch.tensor(list(map(lambda k: RGBtoOneHot(k, dict).astype(int), y)))
-        out = self.forward(x["left_rgb"])
+
+        if self.mode == "LIDAR":
+            out = x["left_disp"]
+        elif self.mode == "LIDAR-RGB":
+            out = torch.cat((x["left_rgb"], x["left_disp"]), 1)
+        else:
+            out = x["left_rgb"]
+
+        out = self.forward(out)
         loss = self.loss(out, y)
         
         pred = torch.argmax(out, 1)
