@@ -44,28 +44,32 @@ class DatasetKITTI2015(Dataset):
         if self.mode in ['training']:
             self.transform.rgb = transforms.Compose([
                 transforms.ToPILImage(),
-                transforms.ToTensor()
+                transforms.ToTensor(),
+                transforms.Normalize(mean = [0.485, 0.456, 0.406],
+                         std= [0.229, 0.224, 0.225])
             ])
             self.transform.depth = transforms.Compose([
                 transforms.ToPILImage(mode='F'), # NOTE: is this correct?!
-                transforms.ToTensor()
+                transforms.ToTensor(),
             ])
             self.transform.segm = transforms.Compose([
                 transforms.ToPILImage(),
-                transforms.ToTensor()
+                transforms.ToTensor(),
             ])
         else: # val
             self.transform.rgb = transforms.Compose([
                 transforms.ToPILImage(),
-                transforms.ToTensor()
+                transforms.ToTensor(),
+                transforms.Normalize(mean = [0.485, 0.456, 0.406],
+                         std= [0.229, 0.224, 0.225])
             ])
             self.transform.depth = transforms.Compose([
                 transforms.ToPILImage(mode='F'), # NOTE: is this correct?!
-                transforms.ToTensor()
+                transforms.ToTensor(),
             ])
             self.transform.segm = transforms.Compose([
                 transforms.ToPILImage(),
-                transforms.ToTensor()
+                transforms.ToTensor(),
             ])
 
     def __getitem__(self, idx):

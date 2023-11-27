@@ -3,7 +3,7 @@ import numpy as np
 
 def RGBtoOneHot(img, colorDict):
     """ Expect the input as tensor image (CxWxH) """
-    img = (np.transpose(img, (1, 2, 0))*255).int().numpy()
+    img = (np.transpose(img, (1, 2, 0))*256).int().numpy()
   
     W = np.power(256, [[0],[1],[2]])
     
@@ -18,6 +18,9 @@ def RGBtoOneHot(img, colorDict):
         except:
             pass
     return mask
+
+
+    
 
 # a label and all meta information
 Label = namedtuple( 'Label' , [
@@ -41,7 +44,7 @@ Label = namedtuple( 'Label' , [
                     # mapping, we use the label that is defined first in the list below.
                     # For example, mapping all void-type classes to the same ID in training,
                     # might make sense for some approaches.
-                    # Max value is 255!
+                    # Max value is 3!
 
     'category'    , # The name of the category that this label belongs to
 
@@ -62,45 +65,45 @@ Label = namedtuple( 'Label' , [
 #--------------------------------------------------------------------------------
 
 # Please adapt the train IDs as appropriate for you approach.
-# Note that you might want to ignore labels with ID 255 during training.
+# Note that you might want to ignore labels with ID 3 during training.
 # Further note that the current train IDs are only a suggestion. You can use whatever you like.
 # Make sure to provide your results using the original IDs and not the training IDs.
 # Note that many IDs are ignored in evaluation and thus you never need to predict these!
 
 labels = [
     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
-    Label(  'unlabeled'            ,  0 ,      255 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
-    Label(  'ego vehicle'          ,  1 ,      255 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
-    Label(  'rectification border' ,  2 ,      255 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
-    Label(  'out of roi'           ,  3 ,      255 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
-    Label(  'static'               ,  4 ,      255 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
-    Label(  'dynamic'              ,  5 ,      255 , 'void'            , 0       , False        , True         , (111, 74,  0) ),
-    Label(  'ground'               ,  6 ,      255 , 'void'            , 0       , False        , True         , ( 81,  0, 81) ),
-    Label(  'road'                 ,  7 ,        18 , 'flat'            , 1       , False        , False        , (128, 64,128) ),
-    Label(  'sidewalk'             ,  8 ,        0 , 'flat'            , 1       , False        , False        , (244, 35,232) ),
-    Label(  'parking'              ,  9 ,      255 , 'flat'            , 1       , False        , True         , (250,170,160) ),
-    Label(  'rail track'           , 10 ,      255 , 'flat'            , 1       , False        , True         , (230,150,140) ),
-    Label(  'building'             , 11 ,        1 , 'construction'    , 2       , False        , False        , ( 70, 70, 70) ),
-    Label(  'wall'                 , 12 ,        2 , 'construction'    , 2       , False        , False        , (102,102,156) ),
-    Label(  'fence'                , 13 ,        3 , 'construction'    , 2       , False        , False        , (190,153,153) ),
-    Label(  'guard rail'           , 14 ,      255 , 'construction'    , 2       , False        , True         , (180,165,180) ),
-    Label(  'bridge'               , 15 ,      255 , 'construction'    , 2       , False        , True         , (150,100,100) ),
-    Label(  'tunnel'               , 16 ,      255 , 'construction'    , 2       , False        , True         , (150,120, 90) ),
-    Label(  'pole'                 , 17 ,        4 , 'object'          , 3       , False        , False        , (153,153,153) ),
-    Label(  'polegroup'            , 18 ,      255 , 'object'          , 3       , False        , True         , (153,153,153) ),
-    Label(  'traffic light'        , 19 ,        5 , 'object'          , 3       , False        , False        , (250,170, 30) ),
-    Label(  'traffic sign'         , 20 ,        6 , 'object'          , 3       , False        , False        , (220,220,  0) ),
-    Label(  'vegetation'           , 21 ,        7 , 'nature'          , 4       , False        , False        , (107,142, 35) ),
-    Label(  'terrain'              , 22 ,        8 , 'nature'          , 4       , False        , False        , (152,251,152) ),
-    Label(  'sky'                  , 23 ,       9, 'sky'             , 5       , False        , False        , ( 70,130,180) ),
-    Label(  'person'               , 24 ,       10 , 'human'           , 6       , True         , False        , (220, 20, 60) ),
-    Label(  'rider'                , 25 ,       11 , 'human'           , 6       , True         , False        , (255,  0,  0) ),
-    Label(  'car'                  , 26 ,       12 , 'vehicle'         , 7       , True         , False        , (  0,  0,142) ),
-    Label(  'truck'                , 27 ,       13 , 'vehicle'         , 7       , True         , False        , (  0,  0, 70) ),
-    Label(  'bus'                  , 28 ,       14 , 'vehicle'         , 7       , True         , False        , (  0, 60,100) ),
-    Label(  'caravan'              , 29 ,      255 , 'vehicle'         , 7       , True         , True         , (  0,  0, 90) ),
-    Label(  'trailer'              , 30 ,      255 , 'vehicle'         , 7       , True         , True         , (  0,  0,110) ),
-    Label(  'train'                , 31 ,       15 , 'vehicle'         , 7       , True         , False        , (  0, 80,100) ),
-    Label(  'motorcycle'           , 32 ,       16 , 'vehicle'         , 7       , True         , False        , (  0,  0,230) ),
-    Label(  'bicycle'              , 33 ,       17 , 'vehicle'         , 7       , True         , False        , (119, 11, 32) ),
+    Label(  'unlabeled'            ,  0 ,      4 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'ego vehicle'          ,  1 ,      4 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'rectification border' ,  2 ,      4 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'out of roi'           ,  3 ,      4 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'static'               ,  4 ,      4 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'dynamic'              ,  5 ,      4 , 'void'            , 0       , False        , True         , (111, 74,  0) ),
+    Label(  'ground'               ,  6 ,      4 , 'void'            , 0       , False        , True         , ( 81,  0, 81) ),
+    Label(  'road'                 ,  7 ,      4 , 'flat'            , 1       , False        , False        , (128, 64,128) ),
+    Label(  'sidewalk'             ,  8 ,      4 , 'flat'            , 1       , False        , False        , (244, 35,232) ),
+    Label(  'parking'              ,  9 ,      4 , 'flat'            , 1       , False        , True         , (250,170,160) ),
+    Label(  'rail track'           , 10 ,      4 , 'flat'            , 1       , False        , True         , (230,150,140) ),
+    Label(  'building'             , 11 ,      4 , 'construction'    , 2       , False        , False        , ( 70, 70, 70) ),
+    Label(  'wall'                 , 12 ,      4 , 'construction'    , 2       , False        , False        , (102,102,156) ),
+    Label(  'fence'                , 13 ,      4 , 'construction'    , 2       , False        , False        , (190,153,153) ),
+    Label(  'guard rail'           , 14 ,      4 , 'construction'    , 2       , False        , True         , (180,165,180) ),
+    Label(  'bridge'               , 15 ,      4 , 'construction'    , 2       , False        , True         , (150,100,100) ),
+    Label(  'tunnel'               , 16 ,      4 , 'construction'    , 2       , False        , True         , (150,120, 90) ),
+    Label(  'pole'                 , 17 ,      4 , 'object'          , 3       , False        , False        , (153,153,153) ),
+    Label(  'polegroup'            , 18 ,      4 , 'object'          , 3       , False        , True         , (153,153,153) ),
+    Label(  'traffic light'        , 19 ,      4 , 'object'          , 3       , False        , False        , (250,170, 30) ),
+    Label(  'traffic sign'         , 20 ,      4 , 'object'          , 3       , False        , False        , (220,220,  0) ),
+    Label(  'vegetation'           , 21 ,      4 , 'nature'          , 4       , False        , False        , (107,142, 35) ),
+    Label(  'terrain'              , 22 ,      4 , 'nature'          , 4       , False        , False        , (152,251,152) ),
+    Label(  'sky'                  , 23 ,      4, 'sky'             , 5       , False        , False        , ( 70,130,180) ),
+    Label(  'person'               , 24 ,       0 , 'human'           , 6       , True         , False        , (220, 20, 60) ),
+    Label(  'rider'                , 25 ,       3 , 'human'           , 6       , True         , False        , (255,  0,  0) ),
+    Label(  'car'                  , 26 ,       2 , 'vehicle'         , 7       , True         , False        , (  0,  0,142) ),
+    Label(  'truck'                , 27 ,       2 , 'vehicle'         , 7       , True         , False        , (  0,  0, 70) ),
+    Label(  'bus'                  , 28 ,       2 , 'vehicle'         , 7       , True         , False        , (  0, 60,100) ),
+    Label(  'caravan'              , 29 ,      2 , 'vehicle'         , 7       , True         , True         , (  0,  0, 90) ),
+    Label(  'trailer'              , 30 ,      2 , 'vehicle'         , 7       , True         , True         , (  0,  0,110) ),
+    Label(  'train'                , 31 ,       4 , 'vehicle'         , 7       , True         , False        , (  0, 80,100) ),
+    Label(  'motorcycle'           , 32 ,       3, 'vehicle'         , 7       , True         , False        , (  0,  0,230) ),
+    Label(  'bicycle'              , 33 ,       3 , 'vehicle'         , 7       , True         , False        , (119, 11, 32) ),
 ]
