@@ -69,7 +69,7 @@ class LightningModel(pl.LightningModule):
                     "ground_truth": {"mask_data": y[i].squeeze().numpy(force=True), "class_labels": class_labels},
                 })
             mask_list.append(mask_img)
-        self.log({"img_with_masks": mask_list})
+        self.log("img_with_masks", mask_list, on_step=False, on_epoch=True)
     
     def configure_optimizers(self):
         return self.optimizer(self.parameters(), lr=self.lr)
