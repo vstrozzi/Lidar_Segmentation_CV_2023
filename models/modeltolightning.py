@@ -69,7 +69,7 @@ class LightningModel(pl.LightningModule):
                     "predictions": {"mask_data": pred[NR_IN_BATCH], "class_labels": class_labels},
                     "ground_truth": {"mask_data": y[NR_IN_BATCH], "class_labels": class_labels},
                 })
-            self.log({"img_with_masks": masked_image}
+            self.log({"img_with_masks": masked_image})
     
     def configure_optimizers(self):
         return self.optimizer(self.parameters(), lr=self.lr)
