@@ -63,7 +63,7 @@ class LightningModel(pl.LightningModule):
             class_labels = {0: "person", 1: "rider", 2: "vehicle", 3:"others"}
             
             mask_img = wandb.Image(
-                x["left_rgb"][NR_IN_BATCH],
+                x["left_rgb"][i],
                 masks={
                     "predictions": {"mask_data": pred[i].numpy(force=True), "class_labels": class_labels},
                     "ground_truth": {"mask_data": y[i].squeeze().numpy(force=True), "class_labels": class_labels},
