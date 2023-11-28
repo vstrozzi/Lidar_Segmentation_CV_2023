@@ -67,7 +67,7 @@ class LightningModel(pl.LightningModule):
                 x["left_rgb"][NR_IN_BATCH],
                 masks={
                     "predictions": {"mask_data": pred[NR_IN_BATCH].numpy(force=True), "class_labels": class_labels},
-                    "ground_truth": {"mask_data": y[NR_IN_BATCH].numpy(force=True), "class_labels": class_labels},
+                    "ground_truth": {"mask_data": y[NR_IN_BATCH].squeeze().numpy(force=True), "class_labels": class_labels},
                 })
             self.log({"img_with_masks": masked_image})
     
