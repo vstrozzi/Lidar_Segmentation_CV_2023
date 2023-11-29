@@ -70,7 +70,7 @@ class LightningModel(pl.LightningModule):
                 })
             mask_list.append(mask_img)
 
-        self.logger.experiment.log("image": mask_list)
+        self.logger.experiment.log({"image": mask_list})
     
     def configure_optimizers(self):
         return self.optimizer(self.parameters(), lr=self.lr)
