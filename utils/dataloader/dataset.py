@@ -107,7 +107,7 @@ class DatasetKITTI2015(Dataset):
 
         data['width'] = img_w
 
-        return data, self.transform.segm(left_segm)
+        return data, self.transform.segm(left_segm).to(torch.int64)
 
     def __len__(self):
         return len(self.left_data_path['rgb'])
