@@ -62,7 +62,7 @@ class LightningModel(pl.LightningModule):
         # Only on first batch
         if batch_idx == 0:
             mask_list = []
-            for i in range(0, x.shape[0]):
+            for i in range(0, y.shape[0]):
                 class_labels = {0: "person", 1: "vehicle", 2: "rider", 3:"others"}  
                 mask_img = wandb.Image(
                     x["left_rgb"][i],
