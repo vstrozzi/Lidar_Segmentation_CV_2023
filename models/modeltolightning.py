@@ -58,17 +58,19 @@ class LightningModel(pl.LightningModule):
         score = self.eval_metric(pred.squeeze(), y.squeeze())
         self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log("val_score", score, on_step=False, on_epoch=True, prog_bar=True)
-        i = 0
 
-        class_labels = {0: "person", 1: "rider", 2: "vehicle", 3:"others"}  
-        mask_img = wandb.Image(
-            x["left_rgb"][i],
-            masks={
-                "predictions": {"mask_data": pred[i].numpy(force=True), "class_labels": class_labels},
-                "ground_truth": {"mask_data": y[i].squeeze().numpy(force=True), "class_labels": class_labels},
-            })
+        mask_list = []
+        for i in range(0, 5):
+            class_labels = {0: "person", 1: "rider", 2: "vehicle", 3:"others"}  
+            mask_img = wandb.Image(
+                x["left_rgb"][i],
+                masks={
+                    "predictions": {"mask_data": pred[i].numpy(force=True), "class_labels": class_labels},
+                    "ground_truth": {"mask_data": y[i].squeeze().numpy(force=True), "class_labels": class_labels},
+                })
+            mask_list.append(mask_img)
 
-        self.log_image("img_with_masks", mask_img, on_step=False, on_epoch=True)
+        self.logger.experiment.log("image": mask_list)
     
     def configure_optimizers(self):
         return self.optimizer(self.parameters(), lr=self.lr)
