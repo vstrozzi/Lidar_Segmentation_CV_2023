@@ -5,7 +5,7 @@ from utils.dataloader.labels import *
 import wandb
 
 class LightningModel(pl.LightningModule):
-    def __init__(self, model, loss, eval_metric, optimizer=torch.optim.Adam, lr=1e-4, mode="RGB"):
+    def __init__(self, model, loss, eval_metric, optimizer=torch.optim.Adam, lr=1e-4, mode="RGB", logger_mode="None"):
         super().__init__()
 
         self.model = model
@@ -15,6 +15,7 @@ class LightningModel(pl.LightningModule):
         self.optimizer = optimizer
         self.lr = lr
         self.mode = mode
+        self.logger_mode = logger_mode
 
     def forward(self, inputs):
         return self.model(inputs)
@@ -60,19 +61,20 @@ class LightningModel(pl.LightningModule):
         self.log("val_score", score, on_step=False, on_epoch=True, prog_bar=True)
 
         # Only on first batch
-        if batch_idx == 0:
-            mask_list = []
-            for i in range(0, y.shape[0]):
-                class_labels = {0: "person", 1: "vehicle", 2: "rider", 3:"others"}  
-                mask_img = wandb.Image(
-                    x["left_rgb"][i],
-                    masks={
-                        "predictions": {"mask_data": pred[i].numpy(force=True), "class_labels": class_labels},
-                        "ground_truth": {"mask_data": y[i].squeeze().numpy(force=True), "class_labels": class_labels},
-                    })
-                mask_list.append(mask_img)
+        if self.logger_mode == "WANDB":
+            if batch_idx == 0:
+                mask_list = []
+                for i in range(0, y.shape[0]):
+                    class_labels = {0: "person", 1: "vehicle", 2: "rider", 3:"others"}  
+                    mask_img = wandb.Image(
+                        x["left_rgb"][i],
+                        masks={
+                            "predictions": {"mask_data": pred[i].numpy(force=True), "class_labels": class_labels},
+                            "ground_truth": {"mask_data": y[i].squeeze().numpy(force=True), "class_labels": class_labels},
+                        })
+                    mask_list.append(mask_img)
 
-            self.logger.experiment.log({"image": mask_list})
+                self.logger.experiment.log({"image": mask_list})
     
     def configure_optimizers(self):
         return self.optimizer(self.parameters(), lr=self.lr)
