@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from calibration import Calibration
 
 if __name__ == "__main__":
-    root = "code/LidarMapping/test_data/"
-    image_dir = os.path.join(root, "imgs/image_1")
-    velodyne_dir = os.path.join(root, "lidar/velodyne_2")
-    calib_dir = os.path.join(root, "calibrations/calib_1")
+    root = "test_data/"
+    image_dir = os.path.join(root, "image_2")
+    velodyne_dir = os.path.join(root, "velodyne")
+    calib_dir = os.path.join(root, "calib")
     cur_id = 1
     # Loading the image, LiDAR data and  Calibration
     img = cv2.imread(os.path.join(image_dir, "%06d.png" % cur_id))
@@ -24,26 +24,26 @@ if __name__ == "__main__":
     # Concatenate LiDAR position with the intesity (3), with (2) we would have the depth
     lidarOnImage = np.concatenate((lidarOnImage, lidar_rect[mask,2].reshape(-1,1)), 1)
     out = dense_map(lidarOnImage.T, img.shape[1], img.shape[0], 6)
-    plt.figure(figsize=(5,5))
-    plt.imsave("depth_map_1%06d.png" % cur_id, out)
+    plt.figure(figsize=(20,40))
+    plt.imsave("depth_map_%06d.png" % cur_id, out)
     plt.close()
     
-    fig = plt.figure(figsize=(5,5))
+    
+
+    fig = plt.figure(figsize=(20,40))
     
     ax = fig.add_subplot(1, 1, 1)
     plt.imshow(img)
     #ax.set_facecolor("white")
     #plt.scatter(x_points, y_points, c=np.arange(len(x_points)), cmap='gist_rainbow')
-   #plt.imshow(out, alpha=0.5, cmap='gist_rainbow')
-    #plt.savefig("overlay_depth_map_%06d.png" % cur_id)
-    #plt.close()
+    plt.imshow(out, alpha=0.5, cmap='gist_rainbow')
+    plt.savefig("overlay_depth_map_%06d.png" % cur_id)
+    plt.close()
     #plt.show()
  
     lidar_to_frame = calib.Img2frame(lidarOnImage.T, img.shape[1], img.shape[0])
     ## Visualize the concatenated image
-    plt.figure(figsize=(5, 5))
-    plt.imshow(lidarOnImage, interpolation='nearest' , cmap='gist_rainbow')
-    print(lidar_to_frame)
-    #plt.imsave("lidar_to_frame%06d.png" % cur_id, lidar_to_frame*255)
-    plt.savefig("lidar_to_frame_%06d.png" % cur_id)
+    plt.figure(figsize=(10, 10))
+    plt.imshow(lidar_to_frame, cmap='binary', interpolation='nearest' )
+    plt.colorbar()
     plt.show()
