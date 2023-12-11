@@ -47,7 +47,7 @@ class LightningModel(pl.LightningModule):
         if self.mode == "LIDAR":
             out = x["left_disp"]
         elif self.mode == "LIDAR-RGB":
-            out = torch.cat((x["left_rgb"], x["left_disp"]), 1)
+            out = 0.7*x["left_rgb"] + 0.3*torch.cat((x["left_disp"], x["left_disp"], x["left_disp"]), 0)
         else:
             out = x["left_rgb"]
 
